@@ -1,0 +1,158 @@
+			+--------------------+
+			|        CS 153      |
+			| PROJECT 1: THREADS |
+			|   DESIGN DOCUMENT  |
+			+--------------------+
+				   
+---- GROUP ----
+
+>> Fill in the names and email addresses of your group members.
+
+Jonathan Chiou <jchio001@ucr.edu> <861055460>
+William Keidel <wkeid001@ucr.edu> <SID>
+
+---- PRELIMINARIES ----
+
+>> If you have any preliminary comments on your submission, notes for the
+>> TAs, or extra credit, please give them here.
+
+>> Please cite any offline or online sources you consulted while
+>> preparing your submission, other than the Pintos documentation, course
+>> text, lecture notes, and course staff.
+
+Alarm Clock: http://knowledgejunk.net/2011/05/06/avoiding-busy-wait-in-timer_sleep-on-pintos/
+
+			     ALARM CLOCK
+			     ===========
+
+---- DATA STRUCTURES ----
+
+>> A1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+Thread: Added int_64t sleep_tcks
+Purpose: Keeps count of the number of ticks a sleeping threads has left before
+it wakes up.
+
+---- ALGORITHMS ----
+
+>> A2: Briefly describe what happens in a call to timer_sleep(),
+>> including the effects of the timer interrupt handler.
+
+In a call to timer sleep, the timer interrupt handler is momentarily
+disabled while we block the current thread.
+
+The timer interrupt handler increments the tick count a thread
+has while decrementing the number of ticks a thread is sleeping for
+
+>> A3: What steps are taken to minimize the amount of time spent in
+>> the timer interrupt handler?
+
+The amount of code was condensed as much as possible in order to lessen
+the work the timer interrupt handler needed to do.
+
+---- SYNCHRONIZATION ----
+
+>> A4: How are race conditions avoided when multiple threads call
+>> timer_sleep() simultaneously?
+
+The interrupt handler is disabled while a thread is running 
+timer_sleep().
+
+>> A5: How are race conditions avoided when a timer interrupt occurs
+>> during a call to timer_sleep()?
+
+Disbaling the interrupt handler means that a timer interrupt occurs only
+after the call to timer_sleep() has finished.
+
+
+---- RATIONALE ----
+
+>> A6: Why did you choose this design?  In what ways is it superior to
+>> another design you considered?
+I chose this design because when I played out the logic behind it in my
+mind, it just felt very simple to me. Another design I considered was
+to instead of calling thread_foreach and checking the status of every
+thread, I can instead maintain a list of blocked threads instead.
+
+
+			 PRIORITY SCHEDULING
+			 ===================
+
+---- DATA STRUCTURES ----
+
+>> B1: Copy here the declaration of each new or changed `struct' or
+>> `struct' member, global or static variable, `typedef', or
+>> enumeration.  Identify the purpose of each in 25 words or less.
+
+In thread.h:
+int_64t base_prior: The thread's original/non-donated priority.
+struck lock *lock_waiting: The lock a thread is waiting on, set to NULL
+if it is waiting for no lock.
+struct list waiters: A list of threads who are waiting for the given
+thread's lock.
+
+>> B2: Explain the data structure used to track priority donation.
+>> Use ASCII art to diagram a nested donation.  (Alternately, submit a
+>> .png file.)
+
+
+---- ALGORITHMS ----
+
+>> B3: How do you ensure that the highest priority thread waiting for
+>> a lock, semaphore, or condition variable wakes up first?
+
+The list of waiters will be essentially a priority queue based on
+base priority (highest in the front => lowest in the back.
+
+>> B4: Describe the sequence of events when a call to lock_acquire()
+>> causes a priority donation.  How is nested donation handled?
+
+-Threads tries to acquire a lock, only to find out that another thread
+already holds it
+-Waiting thread puts itself in the thread with lock's waiting list
+-Thread with lock goes through its waiting list, and sees that that
+specific waiting thread has highest priority
+-The waiting thread "donates" its priority to the thread with a lock by
+setting the thread with lock's donation priority to its priority.
+
+Nested donation is handed by checking for donors recursively. When a 
+thread finds a donor, priority will be donated, and it will then check 
+that donor's waiting list. If it's NULL, we stop. Else, we find a donor
+for our base donor, and then repeat recursively, passing in the original
+thread's priority during each recursive step.
+
+>> B5: Describe the sequence of events when lock_release() is called
+>> on a lock that a higher-priority thread is waiting for.
+
+-The thread with the lock's lock_waiting is changed to NULL
+-The waiting thread is removed from the thread that had a lock's waiting list,
+which means it loses the donated priority it has.
+-It will then search for a donor.
+-The higher-priority thread receives the lock and is now READY.
+-Check to see if the current thread is still of highest priority. If it
+doesn't, the processor is in control.
+
+---- SYNCHRONIZATION ----
+
+>> B6: Describe a potential race in thread_set_priority() and explain
+>> how your implementation avoids it.  Can you use a lock to avoid
+>> this race?
+
+A race condition can possibly occur when the priority integer is being
+written to in a thread while our interrupt handler also trying to write
+something into the priority integer. This condition is avoided by
+disabling interrupts while priority is being modified. The usage of locks
+is unfeasible to avoid this issue, as the interrupt handler is modifying the
+priority integer every some constant number of ticks and locks are unable to
+be acquired by the interrupt handler.
+
+---- RATIONALE ----
+
+>> B7: Why did you choose this design?  In what ways is it superior to
+>> another design you considered?
+
+This design is the only design I was able to logically build up from my own
+logic and information found online. I have not yet thought of another design.
+
