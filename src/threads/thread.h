@@ -110,6 +110,7 @@ struct thread
 extern bool thread_mlfqs;
 
 void thread_init (void);
+void check_ready_list(void);
 void thread_start (void);
 
 void thread_tick (void);
