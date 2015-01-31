@@ -71,7 +71,6 @@ after the call to timer_sleep() has finished.
 
 >> A6: Why did you choose this design?  In what ways is it superior to
 >> another design you considered?
-Hi
 I chose this design because when I played out the logic behind it in my
 mind, it just felt very simple to me. Another design I considered was
 to instead of calling thread_foreach and checking the status of every
