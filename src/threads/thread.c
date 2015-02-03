@@ -72,14 +72,6 @@ void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
 
 
-void check_ready_list(void)
-{
-	if(thread_current()!=ready_list->list_head) //check if this new thread has the highest priority
-	{
-		thread_yield();
-	} 
-}
-
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -94,7 +86,7 @@ void check_ready_list(void)
    It is not safe to call thread_current() until this function
    finishes. */
 void
-thread_init (void) 
+thread_init (void) //this initializes all threads. use init_thread for individual threads 
 {
   ASSERT (intr_get_level () == INTR_OFF);
 
@@ -109,7 +101,6 @@ thread_init (void)
   initial_thread->slp_ticks = 0;
   initial_thread->tid = allocate_tid ();
 
-  check_ready_list();
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -257,7 +248,15 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
+  if(t->priority > thread_current()->priority) //added by William, not tested yet ********************************************
+  {
+        list_push_back(&ready_list, &t->elem); //will go to top of ready_list
+	thread_yield(); //stop thread_current, which will schedule the new thread with higher priority
+  }
+  else
+  {
+  	list_push_back (&ready_list, &t->elem);
+  }
   t->status = THREAD_READY;
   intr_set_level (old_level);
 }
@@ -469,10 +468,10 @@ is_thread (struct thread *t)
 /* Does basic initialization of T as a blocked thread named
    NAME. */
 static void
-init_thread (struct thread *t, const char *name, int priority)
+init_thread (struct thread *t, const char *name, int priority) //initializes new thread, and puts it on the ready list. does not become thread_current
 {
-  ASSERT (t != NULL);
-  ASSERT (PRI_MIN <= priority && priority <= PRI_MAX);
+  ASSERT (t != NULL); //check thread points somewhere
+  ASSERT (PRI_MIN <= priority && priority <= PRI_MAX); //check valid priority
   ASSERT (name != NULL);
 
   memset (t, 0, sizeof *t);
