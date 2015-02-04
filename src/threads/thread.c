@@ -212,6 +212,7 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
+  thread_yield(); //added this line. But will the thread be scheduled before the tid is returned?
   return tid;
 }
 
@@ -252,8 +253,7 @@ thread_unblock (struct thread *t)
   t->status = THREAD_READY;
   intr_set_level (old_level);
 
-  thread_yield(); //********* only line changed in this function. Given a new thread, add to ready list, and yield running_thread
-		 // so scheduler can fugure out who should run
+  //thread_yield(); //********* only line changed in this function. This causes problems. moved to thread_create
 }
 
 /* Returns the name of the running thread. */
