@@ -248,17 +248,12 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  if(t->priority > thread_current()->priority) //added by William, not tested yet ********************************************
-  {
-        list_push_back(&ready_list, &t->elem); //will go to top of ready_list
-	thread_yield(); //stop thread_current, which will schedule the new thread with higher priority
-  }
-  else
-  {
-  	list_push_back (&ready_list, &t->elem);
-  }
+  list_push_back(&ready_list, &t->elem); //will go to top of ready_list
   t->status = THREAD_READY;
   intr_set_level (old_level);
+
+  thread_yield(); //********* only line changed in this function. Given a new thread, add to ready list, and yield running_thread
+		 // so scheduler can fugure out who should run
 }
 
 /* Returns the name of the running thread. */
