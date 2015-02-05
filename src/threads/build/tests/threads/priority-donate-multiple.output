@@ -1,24 +1,21 @@
-qemu -hda /tmp/H2gL6iliPJ.dsk -m 4 -net none -nographic -monitor null
+qemu -hda /tmp/paRu6j09v7.dsk -m 4 -net none -nographic -monitor null
 PiLo hda1
-Loading........
+Loading.........
 Kernel command line: -q run priority-donate-multiple
 Pintos booting with 4,096 kB RAM...
 383 pages available in kernel pool.
 383 pages available in user pool.
-Calibrating timer...  104,857,600 loops/s.
+Calibrating timer...  104,755,200 loops/s.
 Boot complete.
 Executing 'priority-donate-multiple':
 (priority-donate-multiple) begin
-(priority-donate-multiple) Main thread should have priority 32.  Actual priority: 31.
-(priority-donate-multiple) Main thread should have priority 33.  Actual priority: 31.
-(priority-donate-multiple) Thread b should have just finished.
-(priority-donate-multiple) Main thread should have priority 32.  Actual priority: 31.
-(priority-donate-multiple) Thread a should have just finished.
-(priority-donate-multiple) Main thread should have priority 31.  Actual priority: 31.
-(priority-donate-multiple) end
-Execution of 'priority-donate-multiple' complete.
-Timer: 32 ticks
-Thread: 1 idle ticks, 31 kernel ticks, 0 user ticks
-Console: 907 characters output
+Kernel PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
+Call stack: 0xc0028429 0xc002143b 0xc0020902 0xc0021110 0xc002ae51 0xc002a32f 0xc00207d1 0xc0020771.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 20 ticks
+Thread: 0 idle ticks, 20 kernel ticks, 0 user ticks
+Console: 720 characters output
 Keyboard: 0 keys pressed
 Powering off...

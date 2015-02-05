@@ -212,7 +212,10 @@ thread_create (const char *name, int priority,
   /* Add to run queue. */
   thread_unblock (t);
 
-  thread_yield(); //added this line. But will the thread be scheduled before the tid is returned?
+  old_level = intr_disable(); 
+  is_still_top();
+  intr_set_level(old_level);
+  
   return tid;
 }
 
@@ -249,11 +252,10 @@ thread_unblock (struct thread *t)
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back(&ready_list, &t->elem); //will go to top of ready_list
+  list_insert_ordered (&ready_list, &t->elem, (list_less_func *) &which_thread, NULL); //will go to top of ready_list
   t->status = THREAD_READY;
   intr_set_level (old_level);
 
-  //thread_yield(); //********* only line changed in this function. This causes problems. moved to thread_create
 }
 
 /* Returns the name of the running thread. */
@@ -322,10 +324,18 @@ thread_yield (void)
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
-    list_push_back (&ready_list, &cur->elem);
+    list_insert_ordered (&ready_list, &cur->elem, (list_less_func *) &which_thread, NULL); //use which_thread function, which will return true if cur is the higher priority thread
   cur->status = THREAD_READY;
   schedule ();
   intr_set_level (old_level);
+}
+
+bool which_thread(const struct list_elem *a, const struct list_elem *b, void* aux)
+{
+	struct thread* threadA = list_entry(a, struct thread, elem);
+	struct thread *threadB = list_entry(b, struct thread, elem);
+	//can't get priority of a and b while they're still list_elements
+	return (threadA->priority > threadB->priority);
 }
 
 /* Invoke function 'func' on all threads, passing along 'aux'.
@@ -353,7 +363,7 @@ thread_set_priority (int new_priority)
 	int old_priority = thread_current()->priority;
 	thread_current ()->priority = new_priority;
 	if (new_priority < old_priority)
-		test_max(); //check to see if thread_current() is still allowed to run		
+		is_still_top(); //check to see if thread_current() is still allowed to run		
 	intr_set_level (old_level);
 }
 
@@ -596,14 +606,23 @@ allocate_tid (void)
   return tid;
 }
 
-void test_max(void) {
+void is_still_top(void) {
 	
 	if(list_empty(&ready_list))
-		return;
-	
+                return;
+
+	struct thread *new_thread = list_entry(list_front(&ready_list), struct thread, elem);	
 	if(intr_context)
-		intr_yield_on_return();
-	
+	{
+	   	if(new_thread->priority > thread_current()->priority)
+			intr_yield_on_return();
+		return;
+        }	
+	if(new_thread->priority > thread_current()->priority)
+	{
+		thread_yield();
+	}
+	return;
 }
 
 

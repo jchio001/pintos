@@ -196,7 +196,6 @@ timer_interrupt (struct intr_frame *args UNUSED)
   thread_tick ();
   thread_foreach(sleep_tick, NULL); //I need to fill the 2nd parameter with something or I get an error.
   //FOR EACH TICK THAT HAS PASSED, WE NEED TO ALSO MAKE BLOCKED THREADS SLEEP FOR 1 TICK LESS
-  thread_yield();
 }
 
 /* Returns true if LOOPS iterations waits for more than one timer

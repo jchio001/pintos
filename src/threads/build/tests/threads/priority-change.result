@@ -1,20 +1,12 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (priority-change) begin
-  (priority-change) Creating a high-priority thread 2.
-  (priority-change) Thread 2 now lowering priority.
-  (priority-change) Thread 2 should have just lowered its priority.
-  (priority-change) Thread 2 exiting.
-  (priority-change) Thread 2 should have just exited.
-  (priority-change) end
-Differences in `diff -u' format:
-  (priority-change) begin
-  (priority-change) Creating a high-priority thread 2.
-  (priority-change) Thread 2 now lowering priority.
-- (priority-change) Thread 2 should have just lowered its priority.
-  (priority-change) Thread 2 exiting.
-+ (priority-change) Thread 2 should have just lowered its priority.
-  (priority-change) Thread 2 should have just exited.
-  (priority-change) end
+Kernel panic in run: PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
+Call stack: 0xc0028429 0xc002143b 0xc0020902 0xc0021110 0xc002abab 0xc002a32f 0xc00207d1 0xc0020771
+Translation of call stack:
+0xc0028429: debug_panic (.../../lib/kernel/debug.c:38)
+0xc002143b: intr_yield_on_return (..../threads/interrupt.c:225)
+0xc0020902: is_still_top (..../../threads/thread.c:626)
+0xc0021110: thread_create (..../../threads/thread.c:217)
+0xc002abab: test_priority_change (...eads/priority-change.c:20)
+0xc002a32f: run_test (.../tests/threads/tests.c:57)
+0xc00207d1: run_task (.../../../threads/init.c:292)
+0xc0020771: run_actions (.../../../threads/init.c:341)

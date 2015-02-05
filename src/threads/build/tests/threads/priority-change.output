@@ -1,6 +1,6 @@
-qemu -hda /tmp/NrrL02lorx.dsk -m 4 -net none -nographic -monitor null
+qemu -hda /tmp/WykjMr38go.dsk -m 4 -net none -nographic -monitor null
 PiLo hda1
-Loading........
+Loading.........
 Kernel command line: -q run priority-change
 Pintos booting with 4,096 kB RAM...
 383 pages available in kernel pool.
@@ -10,14 +10,13 @@ Boot complete.
 Executing 'priority-change':
 (priority-change) begin
 (priority-change) Creating a high-priority thread 2.
-(priority-change) Thread 2 now lowering priority.
-(priority-change) Thread 2 exiting.
-(priority-change) Thread 2 should have just lowered its priority.
-(priority-change) Thread 2 should have just exited.
-(priority-change) end
-Execution of 'priority-change' complete.
-Timer: 22 ticks
-Thread: 1 idle ticks, 21 kernel ticks, 0 user ticks
-Console: 649 characters output
+Kernel PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
+Call stack: 0xc0028429 0xc002143b 0xc0020902 0xc0021110 0xc002abab 0xc002a32f 0xc00207d1 0xc0020771.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 21 ticks
+Thread: 0 idle ticks, 21 kernel ticks, 0 user ticks
+Console: 746 characters output
 Keyboard: 0 keys pressed
 Powering off...
