@@ -349,14 +349,22 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+	enum intr_level old_level = intr_disable (); //disable to prevent race condition
+	int old_priority = thread_current()->priority;
+	thread_current ()->priority = new_priority;
+	if (new_priority < old_priority)
+		test_max(); //check to see if thread_current() is still allowed to run		
+	intr_set_level (old_level);
 }
 
 /* Returns the current thread's priority. */
 int
 thread_get_priority (void) 
 {
-  return thread_current ()->priority;
+	enum intr_level old_level = intr_disable (); //disable to prevent race condition
+	int priority_tmp = thread_current()->priority;
+	intr_set_level (old_level);
+	return priority_tmp;
 }
 
 /* Sets the current thread's nice value to NICE. */
@@ -587,6 +595,17 @@ allocate_tid (void)
 
   return tid;
 }
+
+void test_max(void) {
+	
+	if(list_empty(&ready_list))
+		return;
+	
+	if(intr_context)
+		intr_yield_on_return();
+	
+}
+
 
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
