@@ -1,0 +1,23 @@
+qemu -hda /tmp/8CmgLf_Epp.dsk -m 4 -net none -nographic -monitor null
+PiLo hda1
+Loading........
+Kernel command line: -q -mlfqs run mlfqs-load-1
+Pintos booting with 4,096 kB RAM...
+383 pages available in kernel pool.
+383 pages available in user pool.
+Calibrating timer...  104,857,600 loops/s.
+Boot complete.
+Executing 'mlfqs-load-1':
+(mlfqs-load-1) begin
+(mlfqs-load-1) spinning for up to 45 seconds, please wait...
+(mlfqs-load-1) FAIL: load average stayed below 0.5 for more than 45 seconds
+Kernel PANIC at ../../tests/threads/tests.c:93 in fail(): test failed
+Call stack: 0xc0028369 0xc002a229 0xc002bff8 0xc002a26f 0xc00207d1 0xc0020771.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 4632 ticks
+Thread: 1 idle ticks, 4631 kernel ticks, 0 user ticks
+Console: 771 characters output
+Keyboard: 0 keys pressed
+Powering off...

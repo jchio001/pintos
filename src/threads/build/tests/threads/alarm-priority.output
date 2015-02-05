@@ -1,0 +1,23 @@
+qemu -hda /tmp/JWrEDW9XMo.dsk -m 4 -net none -nographic -monitor null
+PiLo hda1
+Loading........
+Kernel command line: -q run alarm-priority
+Pintos booting with 4,096 kB RAM...
+383 pages available in kernel pool.
+383 pages available in user pool.
+Calibrating timer...  104,857,600 loops/s.
+Boot complete.
+Executing 'alarm-priority':
+(alarm-priority) begin
+(alarm-priority) Thread priority 25 woke up.
+(alarm-priority) Thread priority 24 woke up.
+Kernel PANIC at ../../threads/thread.c:251 in thread_unblock(): assertion `t->status == THREAD_BLOCKED' failed.
+Call stack: 0xc0028369 0xc0020b90 0xc00226ad 0xc002aa31 0xc00210a6.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 532 ticks
+Thread: 491 idle ticks, 41 kernel ticks, 0 user ticks
+Console: 753 characters output
+Keyboard: 0 keys pressed
+Powering off...

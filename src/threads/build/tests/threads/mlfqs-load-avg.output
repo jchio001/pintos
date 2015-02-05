@@ -1,0 +1,17 @@
+qemu -hda /tmp/YFDlHEnjYj.dsk -m 4 -net none -nographic -monitor null
+PiLo hda1
+Loading........
+Kernel command line: -q -mlfqs run mlfqs-load-avg
+Pintos booting with 4,096 kB RAM...
+383 pages available in kernel pool.
+383 pages available in user pool.
+Calibrating timer...  Kernel PANIC at ../../threads/thread.c:321 in thread_yield(): assertion `!intr_context ()' failed.
+Call stack: 0xc0028379 0xc0020ca5 0xc0020d00 0xc0023c8f 0xc0021854 0xc002198b 0xc00237d8 0xc00239ee 0xc002068f.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 1 ticks
+Thread: 0 idle ticks, 1 kernel ticks, 0 user ticks
+Console: 609 characters output
+Keyboard: 0 keys pressed
+Powering off...
