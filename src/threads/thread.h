@@ -147,4 +147,5 @@ int thread_get_load_avg (void);
 void is_still_top(void);
 void donate(struct thread *t, struct lock *l);
 void nested_donate(void);
+void update_priority(void);
 #endif /* threads/thread.h */
