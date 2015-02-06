@@ -654,6 +654,19 @@ void nested_donate(void) {
 	}		
 }
 
+//this is essentially a donation function, but the code written to do nested donations take into account locks
+//goes through a thread's list of possible donators, and gets the max (the most qualified donor)
+//then donates max's priority if it's high enough
+void update_priority(void) {
+	struct thread *t = thread_current();	
+	//t->priorty = t->base_priority(); //we need a something to store a thread's initial/base priority
+	if (!list_empty(&t->donations)) {
+		//topDonor must be declared inside the if statement, or we might up getting NULL as our top donor
+		struct thread * topDonor = list_max(&t->donations, which_thread, NULL);
+		if (topDonor->priority > t->priorty)
+			t->priority = topDonor->priority;
+	}
+}
 
 
 /* Offset of `stack' member within `struct thread'.
