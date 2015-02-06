@@ -251,6 +251,18 @@ lock_release (struct lock *lock)
 	
 	enum intr_level old_level = intr_disable();
 	lock->holder = NULL;
+	struct list_elem *cur_elem = list_begin(&thread_current()->donations);
+	struct list_elem *the_end = list_end(&thread_current()->donations);
+	struct list_elem *next; struct thread *cur;
+	//iterating through the list of donors to find threads waiting on the lock in question
+	for (;cur_elem != the_end; cur_elem = next) {
+		next = list_next(cur_elem);
+		cur = list_entry(list_of_donors, struct thread, donation_elem);
+		if (cur->wait_on_lock == lock)
+			list_remove(cur);
+		//cur_elem = next;
+	}
+	update_priority();
 	sema_up (&lock->semaphore);
 	intr_set_level (old_level);
 }
