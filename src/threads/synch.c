@@ -109,14 +109,22 @@ void
 sema_up (struct semaphore *sema) 
 {
   enum intr_level old_level;
+  struct thread waitMax = NULL;
 
   ASSERT (sema != NULL);
 
   old_level = intr_disable ();
-  if (!list_empty (&sema->waiters)) 
-    thread_unblock (list_entry (list_pop_front (&sema->waiters),
-                                struct thread, elem));
+  if (!list_empty (&sema->waiters)) {
+    //so the original plan was to get the max of the list of sema->waiters, store it,
+    //remove it from the list, and then unblock. Unfortunately, there is no function
+    //in lists.c that can remove any element from the list, so the list needed to be 
+    //sorted so that I can call list_pop_front to remove it.
+    list_sort(&sema->waiters, which_thread, 0);
+    waitMax = list_entry(list_pop_front(&sema->waiters), struct thread, elem);
+    thread_unblock(waitMax);
+  }                            
   sema->value++;
+  is_still_top(); //now we need to check if thread->current() is still at the top
   intr_set_level (old_level);
 }
 
