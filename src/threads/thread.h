@@ -88,9 +88,12 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
-    int64_t slp_ticks;				/* Putting sleep ticks into each thread */
+    int64_t slp_ticks;					/* Putting sleep ticks into each thread */
 										/* Most convinient way to keep track of sleep ticks! */
     struct list_elem allelem;           /* List element for all threads list. */
+    struct lock *lock_wait;				/* The lock a thread is waiting for; I couldn't think of a good name */
+    struct list donors;					/*list of donors obviously */
+    struct list_elem donor_elem;		/*the element that can serve as another thread's donation list*/
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
@@ -142,4 +145,6 @@ int thread_get_recent_cpu (void);
 int thread_get_load_avg (void);
 
 void is_still_top(void);
+void donate(struct thread *t, struct lock *l);
+void nested_donate(void);
 #endif /* threads/thread.h */

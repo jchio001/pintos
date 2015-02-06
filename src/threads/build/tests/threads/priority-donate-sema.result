@@ -1,23 +1,12 @@
 FAIL
-Test output failed to match any acceptable form.
-
-Acceptable output:
-  (priority-donate-sema) begin
-  (priority-donate-sema) Thread L acquired lock.
-  (priority-donate-sema) Thread L downed semaphore.
-  (priority-donate-sema) Thread H acquired lock.
-  (priority-donate-sema) Thread H finished.
-  (priority-donate-sema) Thread M finished.
-  (priority-donate-sema) Thread L finished.
-  (priority-donate-sema) Main thread finished.
-  (priority-donate-sema) end
-Differences in `diff -u' format:
-  (priority-donate-sema) begin
-  (priority-donate-sema) Thread L acquired lock.
-- (priority-donate-sema) Thread L downed semaphore.
-- (priority-donate-sema) Thread H acquired lock.
-- (priority-donate-sema) Thread H finished.
-- (priority-donate-sema) Thread M finished.
-- (priority-donate-sema) Thread L finished.
-  (priority-donate-sema) Main thread finished.
-  (priority-donate-sema) end
+Kernel panic in run: PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
+Call stack: 0xc0028509 0xc00214cb 0xc0020970 0xc0021199 0xc002b545 0xc002a40f 0xc00207d1 0xc0020771
+Translation of call stack:
+0xc0028509: debug_panic (.../../lib/kernel/debug.c:38)
+0xc00214cb: intr_yield_on_return (..../threads/interrupt.c:225)
+0xc0020970: is_still_top (..../../threads/thread.c:632)
+0xc0021199: thread_create (..../../threads/thread.c:217)
+0xc002b545: test_priority_donate_sema (...priority-donate-sema.c:43)
+0xc002a40f: run_test (.../tests/threads/tests.c:57)
+0xc00207d1: run_task (.../../../threads/init.c:292)
+0xc0020771: run_actions (.../../../threads/init.c:341)

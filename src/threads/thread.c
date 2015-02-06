@@ -362,6 +362,8 @@ thread_set_priority (int new_priority)
 	enum intr_level old_level = intr_disable (); //disable to prevent race condition
 	int old_priority = thread_current()->priority;
 	thread_current ()->priority = new_priority;
+	if (old_priority < new_priority) //want to donate whenever we get a newer, shinier priority
+		nested_donate();
 	if (new_priority < old_priority)
 		is_still_top(); //check to see if thread_current() is still allowed to run		
 	intr_set_level (old_level);
@@ -491,7 +493,11 @@ init_thread (struct thread *t, const char *name, int priority) //initializes new
   t->status = THREAD_BLOCKED;
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
+
   t->priority = priority;
+  t->lock_wait = NULL;
+  list_init(&t->donors);
+  
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
 }
@@ -624,6 +630,29 @@ void is_still_top(void) {
 	}
 	return;
 }
+
+void donate(struct thread *t, struct lock *l) {
+	l->holder->priority = t->priority;
+	t = l->holder;		
+}
+
+//it's easier for me to think about donation when my main donation
+//fucntion is called nested_donate();
+void nested_donate(void) {
+	struct thread *t = thread_current();
+	struct lock *l = t->lock_wait;
+	//If we're at the end of the donor chain or we're into deep, we want
+	//to stop.
+	int depth = 1; //HAVE TO DECLARE DEPTH OUTSIDE. FORWARD DECLARATION NOT SUPPORTED
+	for(; depth < 8 && l != NULL; ++depth) {		
+		if (!l->holder || (l->holder->priority >= t->priority))
+			return;
+			
+		donate(t, l);
+		l = t->lock_wait; //going down the chain
+	}		
+}
+
 
 
 /* Offset of `stack' member within `struct thread'.

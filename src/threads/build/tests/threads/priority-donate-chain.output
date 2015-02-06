@@ -1,34 +1,22 @@
-qemu -hda /tmp/AJvKN5iqw6.dsk -m 4 -net none -nographic -monitor null
+qemu -hda /tmp/VRdOmuyAFK.dsk -m 4 -net none -nographic -monitor null
 PiLo hda1
-Loading........
+Loading.........
 Kernel command line: -q run priority-donate-chain
 Pintos booting with 4,096 kB RAM...
 383 pages available in kernel pool.
 383 pages available in user pool.
-Calibrating timer...  104,857,600 loops/s.
+Calibrating timer...  104,755,200 loops/s.
 Boot complete.
 Executing 'priority-donate-chain':
 (priority-donate-chain) begin
 (priority-donate-chain) main got lock.
-(priority-donate-chain) main should have priority 3.  Actual priority: 0.
-(priority-donate-chain) interloper 1 finished.
-(priority-donate-chain) main should have priority 6.  Actual priority: 0.
-(priority-donate-chain) interloper 2 finished.
-(priority-donate-chain) main should have priority 9.  Actual priority: 0.
-(priority-donate-chain) interloper 3 finished.
-(priority-donate-chain) main should have priority 12.  Actual priority: 0.
-(priority-donate-chain) interloper 4 finished.
-(priority-donate-chain) main should have priority 15.  Actual priority: 0.
-(priority-donate-chain) interloper 5 finished.
-(priority-donate-chain) main should have priority 18.  Actual priority: 0.
-(priority-donate-chain) interloper 6 finished.
-(priority-donate-chain) main should have priority 21.  Actual priority: 0.
-(priority-donate-chain) interloper 7 finished.
-(priority-donate-chain) main finishing with priority 0.
-(priority-donate-chain) end
-Execution of 'priority-donate-chain' complete.
-Timer: 33 ticks
-Thread: 1 idle ticks, 32 kernel ticks, 0 user ticks
-Console: 350400 characters output
+Kernel PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
+Call stack: 0xc0028509 0xc00214cb 0xc0020970 0xc0021199 0xc002bf18 0xc002a40f 0xc00207d1 0xc0020771.
+The `backtrace' program can make call stacks useful.
+Read "Backtraces" in the "Debugging Tools" chapter
+of the Pintos documentation for more information.
+Timer: 20 ticks
+Thread: 0 idle ticks, 20 kernel ticks, 0 user ticks
+Console: 750 characters output
 Keyboard: 0 keys pressed
 Powering off...

@@ -1,4 +1,4 @@
-qemu -hda /tmp/sN6FpTKVt6.dsk -m 4 -net none -nographic -monitor null
+qemu -hda /tmp/HyQAD_cI27.dsk -m 4 -net none -nographic -monitor null
 PiLo hda1
 Loading.........
 Kernel command line: -q run priority-donate-one
@@ -10,7 +10,7 @@ Boot complete.
 Executing 'priority-donate-one':
 (priority-donate-one) begin
 Kernel PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
-Call stack: 0xc0028429 0xc002143b 0xc0020902 0xc0021110 0xc002aca5 0xc002a32f 0xc00207d1 0xc0020771.
+Call stack: 0xc0028509 0xc00214cb 0xc0020970 0xc0021199 0xc002ad85 0xc002a40f 0xc00207d1 0xc0020771.
 The `backtrace' program can make call stacks useful.
 Read "Backtraces" in the "Debugging Tools" chapter
 of the Pintos documentation for more information.

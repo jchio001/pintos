@@ -1,10 +1,12 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/thread.c:251 in thread_unblock(): assertion `t->status == THREAD_BLOCKED' failed.
-Call stack: 0xc0028369 0xc0020b90 0xc00226ad 0xc00228dc 0xc002b2d1 0xc00210a6
+Kernel panic in run: PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
+Call stack: 0xc0028509 0xc00214cb 0xc0020970 0xc0021199 0xc002b336 0xc002a40f 0xc00207d1 0xc0020771
 Translation of call stack:
-0xc0028369: debug_panic (.../../lib/kernel/debug.c:38)
-0xc0020b90: thread_unblock (..../../threads/thread.c:252)
-0xc00226ad: sema_up (...../../threads/synch.c:119)
-0xc00228dc: lock_release (...../../threads/synch.c:236)
-0xc002b2d1: medium_thread_func (...priority-donate-nest.c:79)
-0xc00210a6: kernel_thread (..../../threads/thread.c:439)
+0xc0028509: debug_panic (.../../lib/kernel/debug.c:38)
+0xc00214cb: intr_yield_on_return (..../threads/interrupt.c:225)
+0xc0020970: is_still_top (..../../threads/thread.c:632)
+0xc0021199: thread_create (..../../threads/thread.c:217)
+0xc002b336: test_priority_donate_nest (...priority-donate-nest.c:47)
+0xc002a40f: run_test (.../tests/threads/tests.c:57)
+0xc00207d1: run_task (.../../../threads/init.c:292)
+0xc0020771: run_actions (.../../../threads/init.c:341)
