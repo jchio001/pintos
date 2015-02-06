@@ -66,11 +66,11 @@ sema_down (struct semaphore *sema)
   ASSERT (!intr_context ());
 
   old_level = intr_disable ();
-  while (sema->value == 0) 
-    {
-      list_push_back (&sema->waiters, &thread_current ()->elem);
-      thread_block ();
-    }
+  while (sema->value == 0)   {
+	nested_donate();
+	list_push_back (&sema->waiters, &thread_current ()->elem);
+	thread_block ();
+  }
   sema->value--;
   intr_set_level (old_level);
 }
@@ -109,7 +109,7 @@ void
 sema_up (struct semaphore *sema) 
 {
   enum intr_level old_level;
-  struct thread waitMax = NULL;
+  struct thread *waitMax = NULL;
 
   ASSERT (sema != NULL);
 
@@ -124,7 +124,8 @@ sema_up (struct semaphore *sema)
     thread_unblock(waitMax);
   }                            
   sema->value++;
-  is_still_top(); //now we need to check if thread->current() is still at the top
+  if (!intr_context)
+	is_still_top(); //now we need to check if thread->current() is still at the top
   intr_set_level (old_level);
 }
 
@@ -208,6 +209,7 @@ lock_acquire (struct lock *lock)
 	if (lock->holder) {
 		thread_current()->lock_wait = lock;		
 		list_push_back(&lock->holder->donors,&thread_current()->donor_elem);
+		list_sort(&lock->holder->donors, which_thread, 0);
 	}
 	sema_down (&lock->semaphore);
 	lock->holder = thread_current ();
@@ -251,16 +253,15 @@ lock_release (struct lock *lock)
 	
 	enum intr_level old_level = intr_disable();
 	lock->holder = NULL;
-	struct list_elem *cur_elem = list_begin(&thread_current()->donations);
-	struct list_elem *the_end = list_end(&thread_current()->donations);
+	struct list_elem *cur_elem = list_begin(&thread_current()->donors);
+	struct list_elem *the_end = list_end(&thread_current()->donors);
 	struct list_elem *next; struct thread *cur;
 	//iterating through the list of donors to find threads waiting on the lock in question
 	for (;cur_elem != the_end; cur_elem = next) {
 		next = list_next(cur_elem);
-		cur = list_entry(list_of_donors, struct thread, donation_elem);
-		if (cur->wait_on_lock == lock)
-			list_remove(cur);
-		//cur_elem = next;
+		cur = list_entry(cur_elem, struct thread, donor_elem);
+		if (cur->lock_wait == lock)
+			list_remove(cur_elem);		
 	}
 	update_priority();
 	sema_up (&lock->semaphore);

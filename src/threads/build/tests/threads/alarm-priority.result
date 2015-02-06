@@ -1,12 +1,11 @@
 FAIL
-Kernel panic in run: PANIC at ../../threads/interrupt.c:224 in intr_yield_on_return(): assertion `intr_context ()' failed.
-Call stack: 0xc0028509 0xc00214cb 0xc0020970 0xc0020b86 0xc002ab4d 0xc002a40f 0xc00207d1 0xc0020771
+Kernel panic in run: PANIC at ../../lib/kernel/list.c:84 in list_next(): assertion `is_head (elem) || is_interior (elem)' failed.
+Call stack: 0xc0028619 0xc0028a46 0xc0028b72 0xc0028f24 0xc0022992 0xc002ace1 0xc0021269
 Translation of call stack:
-0xc0028509: debug_panic (.../../lib/kernel/debug.c:38)
-0xc00214cb: intr_yield_on_return (..../threads/interrupt.c:225)
-0xc0020970: is_still_top (..../../threads/thread.c:632)
-0xc0020b86: thread_set_priority (..../../threads/thread.c:369)
-0xc002ab4d: test_alarm_priority (...reads/alarm-priority.c:35)
-0xc002a40f: run_test (.../tests/threads/tests.c:57)
-0xc00207d1: run_task (.../../../threads/init.c:292)
-0xc0020771: run_actions (.../../../threads/init.c:341)
+0xc0028619: debug_panic (.../../lib/kernel/debug.c:38)
+0xc0028a46: is_sorted (.../../lib/kernel/list.c:344)
+0xc0028b72: find_end_of_run (.../../lib/kernel/list.c:368)
+0xc0028f24: list_sort (.../../lib/kernel/list.c:428)
+0xc0022992: sema_up (...../../threads/synch.c:123)
+0xc002ace1: alarm_priority_thread (...reads/alarm-priority.c:58)
+0xc0021269: kernel_thread (..../../threads/thread.c:460)

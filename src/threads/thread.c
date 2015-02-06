@@ -619,16 +619,14 @@ void is_still_top(void) {
                 return;
 
 	struct thread *new_thread = list_entry(list_front(&ready_list), struct thread, elem);	
-	if(intr_context)
+	if(intr_context())
 	{
 	   	if(new_thread->priority > thread_current()->priority)
 			intr_yield_on_return();
 		return;
-        }	
-	if(new_thread->priority > thread_current()->priority)
-	{
-		thread_yield();
-	}
+    }	
+	if(new_thread->priority > thread_current()->priority)	
+		thread_yield();	
 	return;
 }
 
@@ -660,10 +658,10 @@ void nested_donate(void) {
 void update_priority(void) {
 	struct thread *t = thread_current();	
 	//t->priorty = t->base_priority(); //we need a something to store a thread's initial/base priority
-	if (!list_empty(&t->donations)) {
+	if (!list_empty(&t->donors)) {
 		//topDonor must be declared inside the if statement, or we might up getting NULL as our top donor
-		struct thread * topDonor = list_max(&t->donations, which_thread, NULL);
-		if (topDonor->priority > t->priorty)
+		struct thread * topDonor = list_entry(list_max(&t->donors, which_thread, NULL), struct thread, elem);
+		if (topDonor->priority > t->priority)
 			t->priority = topDonor->priority;
 	}
 }
