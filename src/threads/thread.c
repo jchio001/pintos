@@ -330,6 +330,7 @@ thread_yield (void)
   intr_set_level (old_level);
 }
 
+//used to compare 2 thread elements in a list.
 bool which_thread(const struct list_elem *a, const struct list_elem *b, void* aux)
 {
 	struct thread* threadA = list_entry(a, struct thread, elem);
