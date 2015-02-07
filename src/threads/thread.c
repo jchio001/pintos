@@ -613,6 +613,7 @@ allocate_tid (void)
   return tid;
 }
 
+/* Checks ready list. Used to switch to new thread with high priority*/
 void is_still_top(void) {
 	
 	if(list_empty(&ready_list))
