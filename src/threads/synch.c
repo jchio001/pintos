@@ -108,21 +108,20 @@ sema_try_down (struct semaphore *sema)
 void
 sema_up (struct semaphore *sema) 
 {
-  enum intr_level old_level;
-  struct thread *waitMax = NULL;
-
+  enum intr_level old_level;  
   ASSERT (sema != NULL);
 
   old_level = intr_disable ();
+  struct thread *waitMax = NULL;  
   if (!list_empty (&sema->waiters)) {
-    //so the original plan was to get the max of the list of sema->waiters, store it,
-    //remove it from the list, and then unblock. Unfortunately, there is no function
-    //in lists.c that can remove any element from the list, so the list needed to be 
-    //sorted so that I can call list_pop_front to remove it.
-    list_sort(&sema->waiters, which_thread, 0);
-    waitMax = list_entry(list_pop_front(&sema->waiters), struct thread, elem);
+	//NEED TO CHECK THAT THE LIST IS NOT EMPTY BEFORE GETTING THE MAX. IM SMART.
+	struct list_elem *le_max = list_max(&sema->waiters, which_thread, 0);
+    waitMax = list_entry(le_max, struct thread, elem);
+    //waitMax = list_entry(list_pop_front(&sema->waiters), struct thread, elem);
+    list_remove(le_max);
     thread_unblock(waitMax);
   }                            
+  
   sema->value++;
   if (!intr_context)
 	is_still_top(); //now we need to check if thread->current() is still at the top
@@ -208,8 +207,7 @@ lock_acquire (struct lock *lock)
 	
 	if (lock->holder) {
 		thread_current()->lock_wait = lock;		
-		list_push_back(&lock->holder->donors,&thread_current()->donor_elem);
-		list_sort(&lock->holder->donors, which_thread, 0);
+		list_push_back(&lock->holder->donors,&thread_current()->donor_elem);		
 	}
 	sema_down (&lock->semaphore);
 	lock->holder = thread_current ();
@@ -349,9 +347,11 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (!intr_context ());
   ASSERT (lock_held_by_current_thread (lock));
 
-  if (!list_empty (&cond->waiters)) 
-    sema_up (&list_entry (list_pop_front (&cond->waiters),
-                          struct semaphore_elem, elem)->semaphore);
+  if (!list_empty (&cond->waiters)) {
+	list_sort(&cond->waiters, which_thread, 0);
+	sema_up (&list_entry (list_pop_front (&cond->waiters),
+		struct semaphore_elem, elem)->semaphore);
+  }
 }
 
 /* Wakes up all threads, if any, waiting on COND (protected by

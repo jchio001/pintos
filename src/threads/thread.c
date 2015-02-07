@@ -363,6 +363,7 @@ thread_set_priority (int new_priority)
 	enum intr_level old_level = intr_disable (); //disable to prevent race condition
 	int old_priority = thread_current()->priority;
 	thread_current ()->priority = new_priority;
+	update_priority();
 	if (old_priority < new_priority) //want to donate whenever we get a newer, shinier priority
 		nested_donate();
 	if (new_priority < old_priority)
@@ -660,7 +661,7 @@ void update_priority(void) {
 	//t->priorty = t->base_priority(); //we need a something to store a thread's initial/base priority
 	if (!list_empty(&t->donors)) {
 		//topDonor must be declared inside the if statement, or we might up getting NULL as our top donor
-		struct thread * topDonor = list_entry(list_max(&t->donors, which_thread, NULL), struct thread, elem);
+		struct thread * topDonor = list_entry(list_max(&t->donors, which_thread, NULL), struct thread, donor_elem);
 		if (topDonor->priority > t->priority)
 			t->priority = topDonor->priority;
 	}
