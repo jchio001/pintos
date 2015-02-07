@@ -644,7 +644,7 @@ void nested_donate(void) {
 	//If we're at the end of the donor chain or we're into deep, we want
 	//to stop.
 	int depth = 1; //HAVE TO DECLARE DEPTH OUTSIDE. FORWARD DECLARATION NOT SUPPORTED
-	for(; depth < 8 && l != NULL; ++depth) {		
+	for(; depth <= 8 && (l != NULL); ++depth) {		
 		if (!l->holder || (l->holder->priority >= t->priority))
 			return;
 			

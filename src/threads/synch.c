@@ -113,18 +113,19 @@ sema_up (struct semaphore *sema)
 
   old_level = intr_disable ();
   struct thread *waitMax = NULL;  
-  if (!list_empty (&sema->waiters)) {
+  if (!list_empty(&sema->waiters)) {
+	  
 	//NEED TO CHECK THAT THE LIST IS NOT EMPTY BEFORE GETTING THE MAX. IM SMART.
-	struct list_elem *le_max = list_max(&sema->waiters, which_thread, 0);
+	struct list_elem *le_max = list_max(&sema->waiters, &which_thread, 0);
     waitMax = list_entry(le_max, struct thread, elem);
-    //waitMax = list_entry(list_pop_front(&sema->waiters), struct thread, elem);
+        
     list_remove(le_max);
     thread_unblock(waitMax);
-  }                            
-  
-  sema->value++;
-  if (!intr_context)
-	is_still_top(); //now we need to check if thread->current() is still at the top
+  }
+  sema->value++;  
+  if (waitMax != NULL && !intr_context)
+	is_still_top(); //now we need to check if thread->current() is still at the top  
+	
   intr_set_level (old_level);
 }
 
@@ -348,10 +349,34 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (lock_held_by_current_thread (lock));
 
   if (!list_empty (&cond->waiters)) {
-	list_sort(&cond->waiters, which_thread, 0);
+	list_sort(&cond->waiters, &which_thread, 0);
 	sema_up (&list_entry (list_pop_front (&cond->waiters),
 		struct semaphore_elem, elem)->semaphore);
   }
+}
+
+//can't use thread comparator for semas. I think a good amount of tests
+//run of time because of this confusion
+bool sem_compare(const struct list_elem *a, const struct list_elem *b, void *aux) {
+	struct semaphore_elem *semaA = list_entry(a, struct semaphore_elem, elem);
+	struct semaphore_elem *semaB = list_entry(b, struct semaphore_elem, elem);
+	bool semA_empty = list_empty(&semaB->semaphore.waiters);
+	bool semB_empty = list_empty(&semaB->semaphore.waiters);
+	if (semA_empty || semB_empty) {
+			if (semB_empty)
+				return semB_empty;
+			
+			if (semA_empty)
+				return !semA_empty;
+	}
+			
+	struct list_elem *le_a = list_max(&semaA->semaphore.waiters, &which_thread, 0);
+	struct list_elem *le_b = list_max(&semaB->semaphore.waiters, &which_thread, 0);
+	struct thread *threadA = list_entry(le_a, struct thread, elem);
+	struct thread *threadB = list_entry(le_b, struct thread, elem);
+
+	return threadA->priority > threadB-> priority;
+	
 }
 
 /* Wakes up all threads, if any, waiting on COND (protected by
