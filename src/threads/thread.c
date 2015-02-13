@@ -362,7 +362,7 @@ thread_set_priority (int new_priority)
 {
 	enum intr_level old_level = intr_disable (); //disable to prevent race condition
 	int old_priority = thread_current()->priority;
-	thread_current ()->priority = new_priority;
+	thread_current()->base_priority = new_priority;
 	update_priority();
 	if (old_priority < new_priority) //want to donate whenever we get a newer, shinier priority
 		nested_donate();
@@ -497,6 +497,7 @@ init_thread (struct thread *t, const char *name, int priority) //initializes new
   t->stack = (uint8_t *) t + PGSIZE;
 
   t->priority = priority;
+  t->base_priority = priority;
   t->lock_wait = NULL;
   list_init(&t->donors);
   
@@ -614,20 +615,25 @@ allocate_tid (void)
   return tid;
 }
 
+//yeilds to the processor if the current thread does not have the highest priority
 void is_still_top(void) {
 	
 	if(list_empty(&ready_list))
                 return;
 
-	struct thread *new_thread = list_entry(list_front(&ready_list), struct thread, elem);	
+	//ready list was already sorted
+	struct thread *new_thread = list_entry(list_front(&ready_list), struct thread, elem);
+	int priority_nt = new_thread->priority;
+	int priority_cur = thread_current()->priority;
 	if(intr_context())
 	{
-	   	if(new_thread->priority > thread_current()->priority)
+	   	if(priority_nt > priority_cur)
 			intr_yield_on_return();
 		return;
     }	
-	if(new_thread->priority > thread_current()->priority)	
+	if(priority_nt > priority_cur)	
 		thread_yield();	
+	
 	return;
 }
 
@@ -658,10 +664,10 @@ void nested_donate(void) {
 //then donates max's priority if it's high enough
 void update_priority(void) {
 	struct thread *t = thread_current();	
-	//t->priorty = t->base_priority(); //we need a something to store a thread's initial/base priority
+	t->priority = t->base_priority; //we need a something to store a thread's initial/base priority
 	if (!list_empty(&t->donors)) {
 		//topDonor must be declared inside the if statement, or we might up getting NULL as our top donor
-		struct thread * topDonor = list_entry(list_max(&t->donors, which_thread, NULL), struct thread, donor_elem);
+		struct thread * topDonor = list_entry(list_max(&t->donors, &which_thread, NULL), struct thread, donor_elem);
 		if (topDonor->priority > t->priority)
 			t->priority = topDonor->priority;
 	}

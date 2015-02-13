@@ -349,9 +349,9 @@ cond_signal (struct condition *cond, struct lock *lock UNUSED)
   ASSERT (lock_held_by_current_thread (lock));
 
   if (!list_empty (&cond->waiters)) {
-	list_sort(&cond->waiters, &which_thread, 0);
-	sema_up (&list_entry (list_pop_front (&cond->waiters),
-		struct semaphore_elem, elem)->semaphore);
+	//could just find the max and call remove() like I usually do, but whatever
+	list_sort(&cond->waiters, &sem_compare, 0);
+	sema_up(&list_entry(list_pop_front (&cond->waiters), struct semaphore_elem, elem)->semaphore);
   }
 }
 

@@ -88,6 +88,7 @@ struct thread
     char name[16];                      /* Name (for debugging purposes). */
     uint8_t *stack;                     /* Saved stack pointer. */
     int priority;                       /* Priority. */
+    int base_priority;					/* Not-donated priority */
     int64_t slp_ticks;					/* Putting sleep ticks into each thread */
 										/* Most convinient way to keep track of sleep ticks! */
     struct list_elem allelem;           /* List element for all threads list. */
