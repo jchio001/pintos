@@ -39,7 +39,7 @@ FirstName LastName <email@ucr.edu>
 
 >> A3: Why does Pintos implement strtok_r() but not strtok()?
 
-strtok() is not implement because it is not thread safe. strtok() stores
+strtok() is not implemented because it is not thread safe. strtok() stores
 the location where the last token was found internally. When there's
 2 threads calling strtok(), there is a possibility that one of the threads
 will end up using the last token held by the other thread, which is not
