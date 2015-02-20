@@ -26,6 +26,6 @@ void halt(void) {
 
 void exit() {	
 	struct thread* current = thread_current();
-	//need to wait for further knowledge if I want to continue
-	
+	printf ("%s: exit(%d)\n", cur->name, status);
+	thread_exit();	
 }
