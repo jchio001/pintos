@@ -24,8 +24,8 @@ void halt(void) {
 		shutdown_power_off();
 }
 
-void exit() {	
+void exit(int status) {	
 	struct thread* current = thread_current();
-	printf ("%s: exit(%d)\n", cur->name, status);
+	printf ("%s: exit(%d)\n", current->name, status);
 	thread_exit();	
 }

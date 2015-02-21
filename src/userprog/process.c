@@ -17,6 +17,7 @@
 #include "threads/palloc.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/synch.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
@@ -29,7 +30,9 @@ struct exec_helper
 {
 	const char *file_name;    /* Program to load. */
         //##Add semaphore for loading (for resource race cases!)
+        struct semaphore *process_loading;
         //##Add bool for determining if program loaded successfully
+        //bool load_successful();
         //## Add other stuff you need to transfer between process_execute and process_start (hint, think of the children... need a way to add to the child's list, wee below about thread's child list.)
 };
 
@@ -41,26 +44,37 @@ struct exec_helper
 tid_t
 process_execute (const char *file_name) 
 {
-  //##struct exec_helper exec;
-  //##char thread_name[16];
-  char *fn_copy; //## I got rid of this...
+  struct exec_helper exec;
+  char *thread_name;
+  
   tid_t tid;
         
   //##Set exec file name here
-  //##Initialize a semaphore for loading here              
-  //##Add program name to thread_name, watch out for the size, strtok_r.....
+  exec.file_name = file_name;
 
+  //##Initialize a semaphore for loading here              
+  sema_init(exec.process_loading,1);
+  
+  //##Add program name to thread_name, watch out for the size, strtok_r.....
+  char *saveptr;
+  thread_name = strtok_r((char*) file_name, " ", &saveptr);
+  if (sizeof(thread_name) > 16)
+	return -1;
+ 
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy); 
+  tid = thread_create (thread_name, PRI_DEFAULT, start_process, &exec); 
   //## remove fn_copy, Add exec to the end of these params, a void is allowed. Look in thread_create, kf->aux is set to thread_create aux which would be exec. So make good use of exec helper!
-  if (tid == TID_ERROR) //##Change to !=
+  
+  if (tid != TID_ERROR) //##Change to !=
   {  
-  /*Down a semaphore for loading (where should you up it?)
-  *##If program load successfull, add new child to the list of this thread's children (mind your list_elems)... we need to check this list in process wait, when children are done, process wait can finish... see process wait...
+  //Down a semaphore for loading (where should you up it?)
+   sema_down(&(exec.process_loading));
+
+  /*##If program load successfull, add new child to the list of this thread's children (mind your list_elems)... we need to check this list in process wait, when children are done, process wait can finish... see process wait...
   *##else TID_ERROR
   */
+   sema_up(&(exec.process_loading));
   }
-  palloc_free_page (fn_copy); //##Got rid...
   return tid;
 }
 
@@ -336,13 +350,13 @@ load (const char *file_name, void (**eip) (void), void **esp)
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
-i
+
  done:
   /* We arrive here whether the load is successful or not. */
   file_close (file);   //##Remove this!!!!!!!!Since thread has its own file, close it when process is done (hint: in process exit.
   return success;
 }
-
+
 /* load() helpers. */
 
 static bool install_page (void *upage, void *kpage, bool writable);
