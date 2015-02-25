@@ -8,8 +8,8 @@
 
 >> Fill in the names and email addresses of your group members.
 
-FirstName LastName <email@ucr.edu>
-FirstName LastName <email@ucr.edu>
+Jonathan Chiou <jchio001@ucr.edu>
+William Keidel <wkeid001@ucr.edu>
 
 ---- PRELIMINARIES ----
 
@@ -29,11 +29,16 @@ FirstName LastName <email@ucr.edu>
 >> `struct' member, global or static variable, `typedef', or
 >> enumeration.  Identify the purpose of each in 25 words or less.
 
+exec_helper:
+
 ---- ALGORITHMS ----
 
 >> A2: Briefly describe how you implemented argument parsing.  How do
 >> you arrange for the elements of argv[] to be in the right order?
 >> How do you avoid overflowing the stack page?
+
+Using the sample skeleton code given to us, we use the exec_helper struct
+to organize the arguments and pass them to process_execute.
 
 ---- RATIONALE ----
 
