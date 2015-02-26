@@ -93,6 +93,15 @@ distribution will be split into at most 2 pages.
 >> B5: Briefly describe your implementation of the "wait" system call
 >> and how it interacts with process termination.
 
+When we give a process a PID, it will go through a list of child 
+processes for that specific PID. If there is no child with that
+PID or if the child is already waiting, we will return -1. If this
+is not the case, then the current process will wait until the child
+process exit (we will need some sort of identifier to say that we are
+waiting a specific child process). Once the child process exists, we
+will obtain it's exit status, remove the child from the parent
+process's list of children, and return the exit status.
+
 >> B6: Any access to user program memory at a user-specified address
 >> can fail due to a bad pointer value.  Such accesses must cause the
 >> process to be terminated.  System calls are fraught with such
@@ -115,6 +124,16 @@ distribution will be split into at most 2 pages.
 >> fails, so it cannot return before the new executable has completed
 >> loading.  How does your code ensure this?  How is the load
 >> success/failure status passed back to the thread that calls "exec"?
+
+When exec is invoked by a process, we will create a child process and 
+put it into its list of children. The children will have a load
+variable, and that will be set to signify that the child has not
+finished loading. We will also have a sempahore to be downed to
+ensure that only 1 process will be loading at a time. Once we have
+completed loading this child process, we will change this load variable
+to signify if we have succeeded or failed our loading. The parent process
+will now be able to check the load value, and it will return -1 if the
+value reflects a failure.
 
 >> B8: Consider parent process P with child process C.  How do you
 >> ensure proper synchronization and avoid race conditions when P
