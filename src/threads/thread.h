@@ -106,6 +106,12 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
+
+    int fd; //self-explanatory
+    struct list child_list;	//LIST OF CHILDREN
+    struct child_process* cp;    //Pointer to specific child process in our list
+    struct file* cur_file;	//currently running executable file
+    tid_t parent_id; //the parent's PID
   };
 
 /* If false (default), use round-robin scheduler.
@@ -149,4 +155,5 @@ void is_still_top(void);
 void donate(struct thread *t, struct lock *l);
 void nested_donate(void);
 void update_priority(void);
+bool thread_alive(int pid);
 #endif /* threads/thread.h */

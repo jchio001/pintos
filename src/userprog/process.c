@@ -136,13 +136,22 @@ process_exit (void)
   uint32_t *pd;
 
   lock_acquire(&fs_lock);
-  /* Destroy the current process's page directory and switch back
-     to the kernel-only page directory. */
 
   if (cur->cur_file != NULL)
 	file_close(cur->cur_file);
 
   lock_release(&fs_lock);
+  /* Destroy the current process's page directory and switch back
+     to the kernel-only page directory. */
+
+  bool parent_lives = thread_alive(cur->parent_id);
+  bool child_lives = cur->cp;
+  bool running_file = cur->cur_file;
+ 
+ if (parent_lives && child_lives && running_file) {
+	cur->cp->exit = true;
+ }
+
   pd = cur->pagedir;
   if (pd != NULL) 
     {

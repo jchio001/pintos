@@ -677,3 +677,21 @@ void update_priority(void) {
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+
+//What this function does is that we will iterate through every thread that is running.
+//As we go through each thread, we will check its pid. If we get a match, we stop
+//cycling through the list and return true. But if we reach the end of the list and
+//we have NO matches, we return FALSE, as the pid DNE.
+bool thread_alive (int pid) {
+	struct list_elem *counter = list_begin(&all_list);
+	struct list_elem *end = list_end(&all_list);
+	struct thread *t_elem;
+	for (; counter != end; counter = list_next(counter)) {
+		t_elem = list_entry(counter, struct thread, allelem);
+		if (t_elem->tid == pid)
+			return true;
+	}
+	return false;
+
+}
