@@ -147,6 +147,29 @@ value reflects a failure.
 >> terminates without waiting, before C exits?  After C exits?  Are
 >> there any special cases?
 
+We have a wait semaphore that's initialized to 0 and can only be at
+most 1.
+
+When P calls wait before C exits, it'll check the exit flag for the
+child, gets added to the waiting list of the semaphore until C
+changes the exit flag and ups the sempahore. Since the seamphore is
+now upped, P is no longer waiting and is awake. If P were to call
+wait after this point, it will not down the semaphore due to the fact
+that the exit flag is true. Once a parent process has finished waiting
+for a child process, the resources that must be freed (the child_process
+structs in the parent's list of children) will be freed.
+
+When P terminates before C exits, C will call thread_alive to see that 
+the parent is dead, and does not to gain access to the parent's list
+of children. 
+
+When P terminates after C exits and doesn't wait, C's child process
+sturct is freed. The same goes for all remaining child processes.
+
+If we're considering the initial thread (which is parentless), our
+call to thread_alive() to check the state of the parent will always
+return false.
+
 ---- RATIONALE ----
 
 >> B9: Why did you choose to implement access to user memory from the
