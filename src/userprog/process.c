@@ -8,6 +8,7 @@
 #include "userprog/gdt.h"
 #include "userprog/pagedir.h"
 #include "userprog/tss.h"
+#include "userprog/syscall.h"
 #include "filesys/directory.h"
 #include "filesys/file.h"
 #include "filesys/filesys.h"
@@ -21,6 +22,7 @@
 
 static thread_func start_process NO_RETURN;
 static bool load (const char *cmdline, void (**eip) (void), void **esp);
+struct lock fs_lock; //file systems lock
 
 //## Add this INCOMPLETE struct to process.c
 /* Struct used to share between process_execute() in the
@@ -98,6 +100,8 @@ start_process (void *file_name_)
   palloc_free_page (file_name);
   if (!success) 
     thread_exit ();
+  else
+    thread_current()->cp->load = SUCCESS;
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -131,8 +135,14 @@ process_exit (void)
   struct thread *cur = thread_current ();
   uint32_t *pd;
 
+  lock_acquire(&fs_lock);
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
+
+  if (cur->cur_file != NULL)
+	file_close(cur->cur_file);
+
+  lock_release(&fs_lock);
   pd = cur->pagedir;
   if (pd != NULL) 
     {
