@@ -187,7 +187,8 @@ enough time and knowledge given for us to consider anything else.
 As of now, we are thinking of just leaving it alone due to the fact that
 a process will only contain 1 thread. The advantage of this is that we
 can leave it alone and be fine, but if we were to do this in a multi-
-threaded-system, it will obviously fail.
+threaded-system, it will obviously fail. But we aren't, so everything
+should be fine.
 
 			   SURVEY QUESTIONS
 			   ================
@@ -201,14 +202,40 @@ the quarter.
 >> In your opinion, was this assignment, or any one of the three problems
 >> in it, too easy or too hard?  Did it take too long or too little time?
 
+Too hard. There was really no sense of direction enforced, so it's really
+hard to find a path for working on something and then going down from
+there. For a majority of the project, the thought process was "What are
+we doing? Where do we go from here?".
+
 >> Did you find that working on a particular part of the assignment gave
 >> you greater insight into some aspect of OS design?
+
+As of right now, no.
 
 >> Is there some particular fact or hint we should give students in
 >> future quarters to help them solve the problems?  Conversely, did you
 >> find any of our guidance to be misleading?
 
+A concrete place to start needs to be established firmly and early. If
+there is no sense of direction, then a good amount of people will go 
+for the "too little too late" approach.
+
 >> Do you have any suggestions for the TAs to more effectively assist
 >> students, either for future quarters or the remaining projects?
 
+Hints on what to do are good, but sometimes the best way to teach something
+is to explicity tell someone exactly what they should do. Granted, this
+approach will not work in most cases, but the Pintos projects feel like
+something this approach will work on.
+
 >> Any other comments?
+I guess for these projects, they would be fine if students were able to 
+fully commit as much effort as they could onto them. But unfornately,
+most students take these classes in at least their junior year, which
+means that most of them can't fully commit to wokring on the projects.
+They have obligations to other classes and their corresponding projects,
+jobs that they have to work, and jobs that they have to secure in the
+future. Because of this factor, the projects feel a lot more difficult
+than they actually are due to time constraints. You can tell students
+to start early, but they won't until they actually know what to do,
+which takes time.
