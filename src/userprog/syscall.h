@@ -2,12 +2,14 @@
 #define USERPROG_SYSCALL_H
 
 #include <stdbool.h>
+#include "threads/synch.h"
 
 void syscall_init (void);
 void halt(void);
 void exit(int status);
 
 typedef enum {NOT_LOADED, SUCCESS, FAIL} load_state;
+struct lock fs_lock; //lock for filesystem
 
 struct child_process {
 	int pid;
