@@ -16,7 +16,7 @@ struct child_process {
 	load_state load; //Loading status of a child process
 	bool wait; //Is this child process waiting for something?
 	bool exit; //Did this child process quit?
-
+	struct list_elem elem;
 };
 
 #endif /* userprog/syscall.h */
