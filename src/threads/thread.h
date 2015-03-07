@@ -107,6 +107,7 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
 
+    struct list file_list;
     int fd; //self-explanatory
     struct list child_list;	//LIST OF CHILDREN
     struct child_process* cp;    //Pointer to specific child process in our list
