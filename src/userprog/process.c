@@ -1,5 +1,4 @@
 #include "userprog/process.h"
-#include <debug.h>
 #include <inttypes.h>
 #include <round.h>
 #include <stdio.h>
@@ -46,37 +45,25 @@ struct exec_helper
 tid_t
 process_execute (const char *file_name) 
 {
-  struct exec_helper exec;
-  char *thread_name;
-  
-  tid_t tid;
-        
-  //##Set exec file name here
-  exec.file_name = file_name;
+  char *copy;  
+  tid_t tid;      
 
-  //##Initialize a semaphore for loading here              
-  sema_init(exec.process_loading,1);
+  copy = palloc_get_page(0);
+  if (!copy)
+	return TID_ERROR;
+
+  strlcpy(copy, file_name, PGSIZE);
   
   //##Add program name to thread_name, watch out for the size, strtok_r.....
   char *saveptr;
-  thread_name = strtok_r((char*) file_name, " ", &saveptr);
-  if (sizeof(thread_name) > 16)
-	return -1;
+  file_name = strtok_r((char*) file_name, " ", &saveptr);
  
   /* Create a new thread to execute FILE_NAME. */
-  tid = thread_create (thread_name, PRI_DEFAULT, start_process, &exec); 
+  tid = thread_create (file_name, PRI_DEFAULT, start_process, &copy); 
   //## remove fn_copy, Add exec to the end of these params, a void is allowed. Look in thread_create, kf->aux is set to thread_create aux which would be exec. So make good use of exec helper!
   
-  if (tid != TID_ERROR) //##Change to !=
-  {  
-  //Down a semaphore for loading (where should you up it?)
-   sema_down(&(exec.process_loading));
-
-  /*##If program load successfull, add new child to the list of this thread's children (mind your list_elems)... we need to check this list in process wait, when children are done, process wait can finish... see process wait...
-  *##else TID_ERROR
-  */
-   sema_up(&(exec.process_loading));
-  }
+  if (tid != TID_ERROR)
+  	palloc_free_page(copy);
   return tid;
 }
 
@@ -88,6 +75,10 @@ start_process (void *file_name_)
   char *file_name = file_name_;
   struct intr_frame if_;
   bool success;
+  
+  //do the same thing as process execute
+  char *saveptr;
+  file_name = strtok_r(file_name, " ", &saveptr);
 
   /* Initialize interrupt frame and load executable. */
   memset (&if_, 0, sizeof if_);
@@ -97,11 +88,17 @@ start_process (void *file_name_)
   success = load (file_name, &if_.eip, &if_.esp);
 
   /* If load failed, quit. */
-  palloc_free_page (file_name);
-  if (!success) 
+  if (!success) {
+    thread_current()->cp->load = FAIL;
+    sema_up(&thread_current()->cp->load_sema);
+    palloc_free_page (file_name);  
     thread_exit ();
-  else
+  }
+  else {
     thread_current()->cp->load = SUCCESS;
+    sema_up(&thread_current()->cp->load_sema);
+    palloc_free_page(file_name);
+  }    
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -115,8 +112,7 @@ start_process (void *file_name_)
 
 /* Waits for thread TID to die and returns its exit status.  If
    it was terminated by the kernel (i.e. killed due to an
-   exception), returns -1.  If TID is invalid or if it was not a
-   child of the calling process, or if process_wait() has already
+   exception), returns -1.  If TID is invalid or if it was not a   child of the calling process, or if process_wait() has already
    been successfully called for the given TID, returns -1
    immediately, without waiting.
 
@@ -125,7 +121,16 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid UNUSED) 
 {
-  return -1;
+  	struct child_process* cp = get_child_process(child_tid);
+	if (!cp || cp->wait)
+		return -1;
+
+	cp->wait = true;
+	if  (!cp->exit)
+		sema_down(&cp->exit_sema);				
+
+	remove_child_process(cp);		
+	return cp->status;
 }
 
 /* Free the current process's resources. */
@@ -498,8 +503,10 @@ setup_stack (void **esp)
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
         *esp = PHYS_BASE;
-      else
+      else {
         palloc_free_page (kpage);
+	return false;
+      }
     }
   return success;
 }
@@ -522,4 +529,18 @@ install_page (void *upage, void *kpage, bool writable)
      address, then map our page there. */
   return (pagedir_get_page (t->pagedir, upage) == NULL
           && pagedir_set_page (t->pagedir, upage, kpage, writable));
+}
+
+struct file* process_get_file(int fd) {
+	struct thread  *cur = thread_current();
+	struct list_elem *cntr = list_begin(&cur->file_list);
+	struct process_file *pf;
+
+	for (; cntr != list_end(&cur->file_list); cntr = list_next(cntr)) {
+		pf = list_entry(cntr, struct process_file, elem);
+		if (fd == pf->fd)
+			return pf->file;
+	}
+	return NULL;
+
 }
