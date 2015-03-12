@@ -77,11 +77,31 @@ int write (int fd, const void *buff, unsigned size) {
 
 void exit(int status) {	
 	struct thread* cur = thread_current();
-	if (thread_alive(cur->parent_id))  {
+	//cp sounds very awkward, but it's the simplest way to say child process
+	if (thread_alive(cur->parent_id) && (cur->cp != NULL)  {
 		cur->cp->status = status;
 	}
 	printf ("%s: exit(%d)\n", cur->name, status);
 	thread_exit();	
+}
+
+pid_t exec(const char *cmd_line) {
+	pid_t pid = process_execute(cmd_line);
+	struct child_process* child = get_child_process(pid);
+	if (cp != NULL)
+		return -1;
+		
+	if (cp->load == NOT_LOADED)
+		sema_down(&cp->load_sema);
+	
+	//Note to self: need to fix up my load enum
+	if (cp->load == FAIL) {
+		remove_child_process(cp);
+      		return -1;
+	}
+	
+	return pid;
+
 }
 
 void check_valid_ptr (const void *ptr) {
