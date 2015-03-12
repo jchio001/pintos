@@ -541,7 +541,7 @@ setup_stack (void **esp)
       memcpy(*esp, token, strlen(token) + 1);
   }
   
-  int s = (size_t) *esp % WORD_SIZE;
+  int s = (size_t) *esp % 4;
   if (s) {
       *esp -= i;
       memcpy(*esp, &argv[argc], i);
