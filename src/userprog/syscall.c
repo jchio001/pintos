@@ -56,7 +56,6 @@ void halt(void) {
 	shutdown_power_off();
 }
 
-
 int write (int fd, const void *buff, unsigned size) {
 	if (fd == 1) {
 		putbuf(buff, size);
@@ -102,6 +101,17 @@ pid_t exec(const char *cmd_line) {
 	
 	return pid;
 
+}
+
+int wait (pid_t pid) {
+  return process_wait(pid);
+}
+
+bool create (const char *file, unsigned initial_size) {
+  lock_acquire(&fs_lock);
+  bool create_suc = filesys_create(file, initial_size);
+  lock_release(&fs_lock);
+  return create_suc;
 }
 
 void check_valid_ptr (const void *ptr) {
