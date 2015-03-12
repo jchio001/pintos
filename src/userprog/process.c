@@ -531,6 +531,20 @@ install_page (void *upage, void *kpage, bool writable)
           && pagedir_set_page (t->pagedir, upage, kpage, writable));
 }
 
+int process_add_file (struct file *f) {
+	//I could use simpler names for variables, but when I debug, sometimes having file names
+	//with more than 2 letters speeds up my thinking.
+	struct process_file *proc_file = malloc(sizeof(struct process_file));
+	if (proc_file == NULL)
+		return -1;
+		
+  	proc_file->file = f;
+  	proc_file->fd = thread_current()->fd;
+  	++(thread_current()->fd);
+  	list_push_back(&thread_current()->file_list, &proc_file->elem);
+  	return proc_file->fd;
+}
+
 struct file* process_get_file(int fd) {
 	struct thread  *cur = thread_current();
 	struct list_elem *cntr = list_begin(&cur->file_list);
