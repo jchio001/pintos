@@ -510,6 +510,24 @@ setup_stack (void **esp)
 	return false;
       }
     }
+    
+  success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
+  if (success)
+    *esp = PHYS_BASE;
+  else {
+      palloc_free_page (kpage);
+      return false;
+  }
+  
+  char *token;
+  char **argv = malloc(DEFAULT_ARGV*sizeof(char *));
+  if (!argv)
+      return false;
+  
+  int i;
+  int argc = 0;
+  int argv_size = 2;
+  
   return success;
 }
 
