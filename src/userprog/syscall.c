@@ -114,6 +114,27 @@ bool create (const char *file, unsigned initial_size) {
   return create_suc;
 }
 
+bool remove (const char *file) {
+	lock_acquire(&fs_lock);
+	bool remove_suc = filesys_remove(file);
+	lock_release(&fs_lock);
+	return remove_suc;
+}
+
+int open (const char *file) {
+	lock_acquire(&fs_lock);
+	struct file *opened_file = filesys_open(file);
+	//no point opening a file that DNE
+	if (opened_file == NULL) {
+		lock_release(&fs_lock);
+		return -1;
+	}
+	int file_des = process_add_file(f);
+	lock_release(&fs_lock);
+	return file_des;
+}
+
+
 void check_valid_ptr (const void *ptr) {
 	//0x08048000 is the bottom address of our virtual address space
 	if (!is_user_vaddr(ptr) || ptr < 0x08048000){
