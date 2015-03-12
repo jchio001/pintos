@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include "threads/synch.h"
 
+typedef int pid_t;
+
 void syscall_init (void);
 void halt(void);
 void exit(int status);
@@ -25,7 +27,7 @@ struct process_file {
 struct child_process {
 	int pid;
 	int status;
-	load_state load; //Loading status of a child process
+	enum load_state load; //Loading status of a child process
 
 	struct semaphore load_sema; //seamphores for loading + exiting
 	struct semaphore exit_sema;	
@@ -40,6 +42,7 @@ int write (int fd, const void *buff, unsigned size);
 void get_arg (struct intr_frame *f, int *arg, int n);
 void check_valid_ptr(const void *ptr);
 void check_valid_buffer (void* buffer, unsigned size);
+void check_valid_string (const void* str);
 
 int user_to_kernel_ptr(const void *addr);
 struct child_process* get_child_process(int pid);

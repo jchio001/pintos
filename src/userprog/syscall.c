@@ -64,8 +64,7 @@ syscall_handler (struct intr_frame *f UNUSED)
 		arg[0] = user_to_kernel_ptr((const void *) arg[0]);
 		f->eax = remove((const char *) arg[0]);
 		break;
-	case SYS_OPEN:
-		case SYS_OPEN:
+	case SYS_OPEN:		
 		get_arg(f, &arg[0], 1);
 		check_valid_string((const void *) arg[0]);
 		arg[0] = user_to_kernel_ptr((const void *) arg[0]);
@@ -102,9 +101,9 @@ int write (int fd, const void *buff, unsigned size) {
 void exit(int status) {	
 	struct thread* cur = thread_current();
 	//cp sounds very awkward, but it's the simplest way to say child process
-	if (thread_alive(cur->parent_id) && (cur->cp != NULL)  {
+	if (thread_alive(cur->parent_id) && (cur->cp != NULL))
 		cur->cp->status = status;
-	}
+	
 	printf ("%s: exit(%d)\n", cur->name, status);
 	thread_exit();	
 }
@@ -113,16 +112,16 @@ pid_t exec(const char *cmd_line) {
 	pid_t pid = process_execute(cmd_line);
 	struct child_process* child = get_child_process(pid);
 	//note to self: == NULL or !(whatever vars), not !=.
-	if (cp == NULL)
+	if (child == NULL)
 		return -1;
 		
-	if (cp->load == NOT_LOADED)
-		sema_down(&cp->load_sema);
+	if (child->load == NOT_LOADED)
+		sema_down(&child->load_sema);
 	
 	//Note to self: need to fix up my load enum
-	if (cp->load == FAIL) {
-		remove_child_process(cp);
-      		return -1;
+	if (child->load == FAIL) {
+		remove_child_process(child);
+      	return -1;
 	}
 	
 	return pid;
@@ -155,7 +154,7 @@ int open (const char *file) {
 		lock_release(&fs_lock);
 		return -1;
 	}
-	int file_des = process_add_file(f);
+	int file_des = process_add_file(opened_file);
 	lock_release(&fs_lock);
 	return file_des;
 }
@@ -215,4 +214,9 @@ void check_valid_buffer(void* buffer, unsigned sz) {
 		check_valid_ptr((const void*) buff);
 		++buff;
 	}
+}
+
+void check_valid_string (const void* str) {
+  while (* (char *) user_to_kernel_ptr(str) != 0)    
+      str = (char *) str + 1;    
 }

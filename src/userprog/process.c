@@ -520,7 +520,7 @@ setup_stack (void **esp)
   }
   
   char *token;
-  char **argv = malloc(DEFAULT_ARGV*sizeof(char *));
+  char **argv = malloc(2 *sizeof(char *));
   if (!argv)
       return false;
   

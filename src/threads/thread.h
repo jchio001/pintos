@@ -110,7 +110,7 @@ struct thread
     struct list file_list;
     int fd; //self-explanatory
     struct list child_list;	//LIST OF CHILDREN
-    struct child_process* cp;    //Pointer to specific child process in our list
+    struct child_process *cp;    //Pointer to specific child process in our list
     struct file* cur_file;	//currently running executable file
     tid_t parent_id; //the parent's PID
   };
