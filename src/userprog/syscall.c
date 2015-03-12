@@ -87,7 +87,8 @@ void exit(int status) {
 pid_t exec(const char *cmd_line) {
 	pid_t pid = process_execute(cmd_line);
 	struct child_process* child = get_child_process(pid);
-	if (cp != NULL)
+	//note to self: == NULL or !(whatever vars), not !=.
+	if (cp == NULL)
 		return -1;
 		
 	if (cp->load == NOT_LOADED)
