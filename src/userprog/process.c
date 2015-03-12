@@ -524,10 +524,10 @@ setup_stack (void **esp)
       return false;
   
   //In the code below, we are pushing arguments onto the stack
-  char *token;
+  char *token = (char *) file_name;
   int argc = 0;
   int argv_size = 2;
-  for (token = (char *) file_name; token != NULL; token = strtok_r (NULL, " ", save_ptr)) {
+  for (; token != NULL; token = strtok_r (NULL, " ", save_ptr)) {
       *esp -= strlen(token) + 1;
       argv[argc] = *esp;
       argc++;
