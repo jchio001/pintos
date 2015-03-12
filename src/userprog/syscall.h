@@ -9,7 +9,7 @@ void halt(void);
 void exit(int status);
 pid_t exec(const char *cmd_line);
 
-typedef enum {NOT_LOADED, SUCCESS, FAIL} load_state;
+enum load_state {NOT_LOADED, SUCCESS, FAIL};
 struct lock fs_lock; //lock for filesystem
 
 struct process_file {
