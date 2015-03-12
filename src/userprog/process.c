@@ -286,6 +286,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
   //*/
 
   /* Open executable file. */
+  lock_acquire(&fs_lock); 
   file = filesys_open (file_name);
   if (file == NULL) 
     {
@@ -377,7 +378,8 @@ load (const char *file_name, void (**eip) (void), void **esp)
 
  done:
   /* We arrive here whether the load is successful or not. */
-  file_close (file);   //##Remove this!!!!!!!!Since thread has its own file, close it when process is done (hint: in process exit.
+  //file_close (file);   //##Removed this!
+  lock_release(&fs_lock);
   return success;
 }
 
