@@ -519,14 +519,35 @@ setup_stack (void **esp)
       return false;
   }
   
-  char *token;
   char **argv = malloc(2 *sizeof(char *));
   if (!argv)
       return false;
   
-  int i;
+  //In the code below, we are pushing arguments onto the stack
+  char *token;
   int argc = 0;
   int argv_size = 2;
+  for (token = (char *) file_name; token != NULL; token = strtok_r (NULL, " ", save_ptr)) {
+      *esp -= strlen(token) + 1;
+      argv[argc] = *esp;
+      argc++;
+      //We need to resize argv.
+      if (argc >= argv_size) {
+	  argv_size *= 2;
+	  argv = realloc(argv, argv_size*sizeof(char *));
+	  if (!argv)
+	      return false;
+      }
+      memcpy(*esp, token, strlen(token) + 1);
+  }
+  
+  int s = (size_t) *esp % WORD_SIZE;
+  if (s) {
+      *esp -= i;
+      memcpy(*esp, &argv[argc], i);
+  }
+  argv[argc] = 0;
+  //Incomplete
   
   return success;
 }
