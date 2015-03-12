@@ -48,6 +48,31 @@ syscall_handler (struct intr_frame *f UNUSED)
 		f->eax = write(arg[0], (const void *) arg[1],
 		(unsigned) arg[2]);
 		break;
+	case SYS_WAIT:
+		get_arg(f, &arg[0], 1);
+		f->eax = wait(arg[0]);
+		break;
+	case SYS_CREATE:
+		get_arg(f, &arg[0], 2);
+		check_valid_string((const void *) arg[0]);
+		arg[0] = user_to_kernel_ptr((const void *) arg[0]);
+		f->eax = create((const char *)arg[0], (unsigned) arg[1]);
+		break;
+	case SYS_REMOVE:
+		get_arg(f, &arg[0], 1);
+		check_valid_string((const void *) arg[0]);
+		arg[0] = user_to_kernel_ptr((const void *) arg[0]);
+		f->eax = remove((const char *) arg[0]);
+		break;
+	case SYS_OPEN:
+		case SYS_OPEN:
+		get_arg(f, &arg[0], 1);
+		check_valid_string((const void *) arg[0]);
+		arg[0] = user_to_kernel_ptr((const void *) arg[0]);
+		f->eax = open((const char *) arg[0]);
+		break; 		
+	default:
+		break;
   }
   thread_exit ();
 }
