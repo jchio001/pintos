@@ -159,6 +159,39 @@ int open (const char *file) {
 	return file_des;
 }
 
+int read (int fd, void *buffer, unsigned size) {
+  unsigned counter = 0;
+  uint8_t* buff_local = (uint8_t *) buffer;
+  if (fd == 0) {
+      for (; counter < size; counter++) {
+	  buff_local[i] = input_getc();
+      }
+      return size;
+   }
+   
+  lock_acquire(&fs_lock);
+  struct file *f = process_get_file(fd);
+  if (f == NULL) {
+      lock_release(&fs_lock);
+      return -1;
+  }
+  int bytes = file_read(f, buffer, size);
+  lock_release(&fs_lock);
+  return bytes;
+}
+
+int filesize (int fd)
+{
+  lock_acquire(&fs_lock);
+  struct file *f = process_get_file(fd);
+  if (!f) {
+      lock_release(&fs_lock);
+      return -1;
+  }
+  int len = file_length(f);
+  lock_release(&fs_lock);
+  return len;
+}
 
 void check_valid_ptr (const void *ptr) {
 	//0x08048000 is the bottom address of our virtual address space
