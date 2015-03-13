@@ -243,9 +243,9 @@ void remove_child_process(struct child_process *child) {
 
 
 void get_arg (struct intr_frame *f, int *arg, int n) {
-	int i;
+	int i = 0;
 	int *ptr;
-	for (i = 0; i < n; i++) {
+	for (; i < n; i++) {
 		ptr = (int *) f->esp + i + 1;
 		check_valid_ptr((const void *) ptr);
 		arg[i] = *ptr;
