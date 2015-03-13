@@ -19,8 +19,10 @@
 #include "threads/vaddr.h"
 #include "threads/synch.h"
 
+#define TWO 2 
+
 static thread_func start_process NO_RETURN;
-static bool load (const char *cmdline, void (**eip) (void), char **esp);
+static bool load (const char *cmdline, void (**eip) (void), void **esp, char** saveptr); 
 struct lock fs_lock; //file systems lock
 
 //## Add this INCOMPLETE struct to process.c
@@ -85,7 +87,7 @@ start_process (void *file_name_)
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  success = load(file_name, &if_.eip, &if_.esp);
+  success = load(file_name, &if_.eip, &if_.esp,&saveptr);
 
   /* If load failed, quit. */
   if (!success) {
@@ -263,7 +265,7 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
    and its initial stack pointer into *ESP.
    Returns true if successful, false otherwise. */
 bool
-load (const char *file_name, void (**eip) (void), char **esp) 
+load (const char *file_name, void (**eip) (void), void **esp, char** saveptr) 
 {
   struct thread *t = thread_current ();
   //##char file_name[NAME_MAX + 2]; ##Add a file name variable here, the file_name and cmd_line are DIFFERENT!
@@ -280,19 +282,15 @@ load (const char *file_name, void (**eip) (void), char **esp)
     goto done;
   process_activate ();
 
-  //##Use strtok_r to remove file_name from cmd_line
-  //
-  //
-  //*/
-
   /* Open executable file. */
   lock_acquire(&fs_lock); 
-  file = filesys_open (file_name);
+  file = filesys_open(file_name);
   if (file == NULL) 
     {
       printf ("load: %s: open failed\n", file_name);
       goto done; 
     }
+   file_deny_write(file);
 //##Disable file write for 'file' here. GO TO BOTTOM. DON'T CHANGE ANYTHING IN THESE IF AND FOR STATEMENTS  
 
 /* Read and verify executable header. */
@@ -368,7 +366,7 @@ load (const char *file_name, void (**eip) (void), char **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack(esp, file_name, esp))   //##Add cmd_line to setup_stack param here, also change setup_stack
+  if (!setup_stack(esp, file_name, saveptr))   //##Add cmd_line to setup_stack param here, also change setup_stack
     goto done;
 
   /* Start address. */
@@ -499,8 +497,7 @@ setup_stack (void **esp, const char* file, char** save_ptr) {
   bool success = false;
 
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
-  if (kpage != NULL) 
-    {
+  if (kpage != NULL) {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
       if (success)
         *esp = PHYS_BASE;
@@ -508,17 +505,11 @@ setup_stack (void **esp, const char* file, char** save_ptr) {
         palloc_free_page (kpage);
 	return false;
       }
-    }
-    
-  success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-  if (success)
-    *esp = PHYS_BASE;
-  else {
-      palloc_free_page (kpage);
-      return false;
   }
+  else
+    return false;
   
-  char **argv = malloc(2 *sizeof(char *));
+  char **argv = malloc(TWO * (sizeof(char *)));
   if (!argv)
       return false;
   
@@ -553,8 +544,20 @@ setup_stack (void **esp, const char* file, char** save_ptr) {
       *esp -= sizeof(char *);
       memcpy(*esp, &argv[cnt], sizeof(char *));
   }
-  //Incomplete
-  
+
+  /* Below, we are going to do the following:
+     push argv and argv, push our fake return address, and then
+     free the memory allocated to argv.
+  */
+  token = *esp;
+  *esp -= sizeof(char **);
+  memcpy(*esp, &token, sizeof(char **));
+  *esp -= sizeof(int);
+   memcpy(*esp, &argc, sizeof(int));
+  *esp -= sizeof(void *);
+  memcpy(*esp, &argv[argc], sizeof(void *));
+  free(argv);
+
   return success;
 }
 

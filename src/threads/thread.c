@@ -1,6 +1,4 @@
 #include "threads/thread.h"
-#include <debug.h>
-#include <stddef.h>
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +11,7 @@
 #include "threads/vaddr.h"
 #ifdef USERPROG
 #include "userprog/process.h"
+#include "userprog/syscall.h"
 #endif
 
 /* Random value for struct thread's `magic' member.
@@ -209,13 +208,16 @@ thread_create (const char *name, int priority,
 
   intr_set_level (old_level);
 
-  /* Add to run queue. */
-  thread_unblock (t);
+  t->parent_id = thread_tid();
+  struct child_process *child = add_child_process(t->tid);
+  t->cp = child;
 
   old_level = intr_disable(); 
   is_still_top();
   intr_set_level(old_level);
-  
+
+  thread_unblock(t);
+ 
   return tid;
 }
 
@@ -503,6 +505,11 @@ init_thread (struct thread *t, const char *name, int priority) //initializes new
   
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
+
+  t->fd = 2;
+  list_init(&t->child_list);
+  t->cp = NULL;
+  t->parent_id = -1;
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and

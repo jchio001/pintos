@@ -14,6 +14,7 @@
 #include "filesys/filesys.h"
 #include "threads/flags.h"
 #include "threads/init.h"
+#include "devices/input.h"
 #include "threads/interrupt.h"
 #include "threads/palloc.h"
 #include "threads/malloc.h"
@@ -220,6 +221,24 @@ int user_to_kernel_ptr (const void *addr) {
 		exit(-1);
 
 	return (int) ptr;
+}
+
+
+struct child_process* add_child_process (int pid) {
+
+	struct child_process* cp = malloc(sizeof(struct child_process));
+	if (cp == NULL)
+		return NULL;
+
+	cp->pid = pid;
+	cp->load = NOT_LOADED;
+	cp->wait = false;
+	cp->exit = false;
+	sema_init(&cp->load_sema, 0);
+	sema_init(&cp->exit_sema, 0);
+	struct thread *cur = thread_current();
+	list_push_back(&cur->child_list, &cp->elem);
+	return cp;	
 }
 
 struct child_process* get_child_process(int pid) {
