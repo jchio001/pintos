@@ -128,10 +128,10 @@ pid_t exec(const char *cmd_line) {
 	if (child->load == NOT_LOADED)
 		sema_down(&child->load_sema);
 	
-	//Note to self: need to fix up my load enum
+	//Load enum fixed.
 	if (child->load == FAIL) {
 		remove_child_process(child);
-      	return -1;
+      		return -1;
 	}
 	
 	return pid;
@@ -263,6 +263,6 @@ void check_valid_buffer(void* buffer, unsigned sz) {
 }
 
 void check_valid_string (const void* str) {
-  while (* (char *) user_to_kernel_ptr(str) != 0)    
-      str = (char *) str + 1;    
+	while (* (char *) user_to_kernel_ptr(str) != 0)    
+		str = (char *) str + 1;    
 }
