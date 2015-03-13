@@ -581,7 +581,7 @@ install_page (void *upage, void *kpage, bool writable)
 int process_add_file (struct file *f) {
 	//I could use simpler names for variables, but when I debug, sometimes having file names
 	//with more than 2 letters speeds up my thinking.
-	struct process_file *proc_file = malloc(sizeof(struct process_file));
+	struct process_helper *proc_file = malloc(sizeof(struct process_helper));
 	if (proc_file == NULL)
 		return -1;
 		
@@ -595,10 +595,10 @@ int process_add_file (struct file *f) {
 struct file* process_get_file(int fd) {
 	struct thread  *cur = thread_current();
 	struct list_elem *cntr = list_begin(&cur->file_list);
-	struct process_file *pf;
+	struct process_helper *pf;
 
 	for (; cntr != list_end(&cur->file_list); cntr = list_next(cntr)) {
-		pf = list_entry(cntr, struct process_file, elem);
+		pf = list_entry(cntr, struct process_helper, elem);
 		if (fd == pf->fd)
 			return pf->file;
 	}
