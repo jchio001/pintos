@@ -174,7 +174,7 @@ int read (int fd, void *buffer, unsigned size) {
   uint8_t* buff_local = (uint8_t *) buffer;
   if (fd == 0) {
       for (; counter < size; counter++) {
-	  buff_local[i] = input_getc();
+	  buff_local[counter] = input_getc();
       }
       return size;
    }

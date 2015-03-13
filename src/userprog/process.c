@@ -20,7 +20,7 @@
 #include "threads/synch.h"
 
 static thread_func start_process NO_RETURN;
-static bool load (const char *cmdline, void (**eip) (void), void **esp);
+static bool load (const char *cmdline, void (**eip) (void), char **esp);
 struct lock fs_lock; //file systems lock
 
 //## Add this INCOMPLETE struct to process.c
@@ -252,7 +252,7 @@ struct Elf32_Phdr
 #define PF_W 2          /* Writable. */
 #define PF_R 4          /* Readable. */
 
-static bool setup_stack (void **esp);
+static bool setup_stack (void **esp, const char* file, char** save_ptr);
 static bool validate_segment (const struct Elf32_Phdr *, struct file *);
 static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
                           uint32_t read_bytes, uint32_t zero_bytes,
@@ -263,7 +263,7 @@ static bool load_segment (struct file *file, off_t ofs, uint8_t *upage,
    and its initial stack pointer into *ESP.
    Returns true if successful, false otherwise. */
 bool
-load (const char *file_name, void (**eip) (void), void **esp) 
+load (const char *file_name, void (**eip) (void), char **esp) 
 {
   struct thread *t = thread_current ();
   //##char file_name[NAME_MAX + 2]; ##Add a file name variable here, the file_name and cmd_line are DIFFERENT!
@@ -368,7 +368,7 @@ load (const char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp))   //##Add cmd_line to setup_stack param here, also change setup_stack
+  if (!setup_stack(esp, file_name, esp))   //##Add cmd_line to setup_stack param here, also change setup_stack
     goto done;
 
   /* Start address. */
@@ -494,7 +494,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp) {
+setup_stack (void **esp, const char* file, char** save_ptr) {
   uint8_t *kpage;
   bool success = false;
 
@@ -523,7 +523,7 @@ setup_stack (void **esp) {
       return false;
   
   //In the code below, we are pushing arguments onto the stack
-  char *token = (char *) file_name;
+  char *token = (char *) file;
   int argc = 0;
   int argv_size = 2;
   for (; token != NULL; token = strtok_r (NULL, " ", save_ptr)) {
