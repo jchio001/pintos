@@ -541,6 +541,7 @@ setup_stack (void **esp) {
   }
   
   argv[argc] = 0;
+  //Need to make sure that the size is a multiple of the word size (4 bytes)!!!11
   int s = (size_t) *esp % 4;
   if (s) {
       *esp -= s;
