@@ -20,7 +20,7 @@ int filesize (int fd);
 enum load_state {NOT_LOADED, SUCCESS, FAIL};
 struct lock fs_lock; //lock for filesystem
 
-struct process_file {
+struct process_helper {
 	struct file* file;
 	int fd;
 	struct list_elem elem;
