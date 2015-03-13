@@ -190,14 +190,16 @@ int read (int fd, void *buffer, unsigned size) {
   return bytes;
 }
 
-int filesize (int fd)
-{
+int filesize (int fd) {
+	
   lock_acquire(&fs_lock);
   struct file *f = process_get_file(fd);
+  
   if (!f) {
       lock_release(&fs_lock);
       return -1;
   }
+  
   int len = file_length(f);
   lock_release(&fs_lock);
   return len;
