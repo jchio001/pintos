@@ -603,5 +603,25 @@ struct file* process_get_file(int fd) {
 			return pf->file;
 	}
 	return NULL;
+}
 
+void process_close_file (int fd) {
+  struct list_elem *iterator = list_begin(&t->file_list);
+
+  struct thread *cur = thread_current();
+  struct list_elem *next;
+  for (;iterator != list_end (&cur->file_list); iterator = next) {
+      next = list_next(iterator);
+      struct process_file *pf = list_entry (iterator, struct process_helper, elem);
+      bool sameFD = (fd == pf->fd);
+      bool closeFile = fd == -1;
+      if (sameFD || closeFile) {
+	  file_close(pf->file);
+	  list_remove(&pf->elem);
+	  free(pf);
+	  if (fd > -1)
+	      return;
+	    
+      }
+   }
 }
