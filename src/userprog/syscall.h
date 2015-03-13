@@ -14,6 +14,8 @@ int wait (pid_t pid);
 bool create (const char *file, unsigned initial_size);
 bool remove (const char *file);
 int open (const char *file);
+int read (int fd, void *buffer, unsigned size);
+int filesize (int fd);
 
 enum load_state {NOT_LOADED, SUCCESS, FAIL};
 struct lock fs_lock; //lock for filesystem
