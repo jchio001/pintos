@@ -207,6 +207,7 @@ void get_arg (struct intr_frame *f, int *arg, int n) {
 	}
 }
 
+//based the naming of these functions on the given sample code.
 void check_valid_buffer(void* buffer, unsigned sz) {
 	unsigned i = 0;
 	char* buff = (char *) buffer; //our local buffer
