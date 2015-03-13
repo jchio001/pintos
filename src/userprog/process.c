@@ -85,7 +85,7 @@ start_process (void *file_name_)
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
-  success = load (file_name, &if_.eip, &if_.esp);
+  success = load(file_name, &if_.eip, &if_.esp);
 
   /* If load failed, quit. */
   if (!success) {
@@ -606,13 +606,13 @@ struct file* process_get_file(int fd) {
 }
 
 void process_close_file (int fd) {
-  struct list_elem *iterator = list_begin(&t->file_list);
-
   struct thread *cur = thread_current();
+  struct list_elem *iterator = list_begin(&cur->file_list);
+
   struct list_elem *next;
   for (;iterator != list_end (&cur->file_list); iterator = next) {
       next = list_next(iterator);
-      struct process_file *pf = list_entry (iterator, struct process_helper, elem);
+      struct process_helper *pf = list_entry (iterator, struct process_helper, elem);
       bool sameFD = (fd == pf->fd);
       bool closeFile = fd == -1;
       if (sameFD || closeFile) {
