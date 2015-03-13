@@ -69,11 +69,21 @@ syscall_handler (struct intr_frame *f UNUSED)
 		check_valid_string((const void *) arg[0]);
 		arg[0] = user_to_kernel_ptr((const void *) arg[0]);
 		f->eax = open((const char *) arg[0]);
-		break; 		
+		break; 
+	case SYS_READ:
+		get_arg(f, &arg[0], 3);
+		check_valid_buffer((void *) arg[1], (unsigned) arg[2]);
+		arg[1] = user_to_kernel_ptr((const void *) arg[1]);
+		f->eax = read(arg[0], (void *) arg[1], (unsigned) arg[2]);
+		break;
+	case SYS_FILESIZE:
+		get_arg(f, &arg[0], 1);
+		f->eax = filesize(arg[0]);
+		break;
 	default:
+		thread_exit();
 		break;
   }
-  thread_exit ();
 }
 
 void halt(void) {
