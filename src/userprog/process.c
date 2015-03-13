@@ -494,8 +494,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 /* Create a minimal stack by mapping a zeroed page at the top of
    user virtual memory. */
 static bool
-setup_stack (void **esp) 
-{
+setup_stack (void **esp) {
   uint8_t *kpage;
   bool success = false;
 
@@ -541,12 +540,18 @@ setup_stack (void **esp)
       memcpy(*esp, token, strlen(token) + 1);
   }
   
+  argv[argc] = 0;
   int s = (size_t) *esp % 4;
   if (s) {
-      *esp -= i;
-      memcpy(*esp, &argv[argc], i);
+      *esp -= s;
+      memcpy(*esp, &argv[argc], s);
   }
-  argv[argc] = 0;
+  
+  int cnt = argc;
+  for (; cnt >= 0; cnt--) {
+      *esp -= sizeof(char *);
+      memcpy(*esp, &argv[cnt], sizeof(char *));
+  }
   //Incomplete
   
   return success;
