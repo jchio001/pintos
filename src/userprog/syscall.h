@@ -51,5 +51,6 @@ int user_to_kernel_ptr(const void *addr);
 struct child_process* add_child_process (int pid);
 struct child_process* get_child_process(int pid);
 void remove_child_process(struct child_process *child);
+void remove_child_processes (void);
 
 #endif /* userprog/syscall.h */

@@ -113,6 +113,7 @@ struct thread
     struct child_process *cp;    //Pointer to specific child process in our list
     struct file* cur_file;	//currently running executable file
     tid_t parent_id; //the parent's PID
+    struct file* executable;
   };
 
 /* If false (default), use round-robin scheduler.

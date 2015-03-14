@@ -260,6 +260,20 @@ void remove_child_process(struct child_process *child) {
 	free(child);
 }
 
+void remove_child_processes (void) {
+  struct thread *cur = thread_current();
+  struct list_elem *next;
+  struct list_elem *cntr = list_begin(&cur->child_list);
+
+  while (cntr != list_end (&cur->child_list)) {
+      next = list_next(cntr);
+      struct child_process *cp = list_entry (cntr, struct child_process,
+					     elem);
+      list_remove(&cp->elem);
+      free(cp);
+      cntr = next;
+  }
+ }
 
 void get_arg (struct intr_frame *f, int *arg, int n) {
 	int i = 0;

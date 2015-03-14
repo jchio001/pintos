@@ -143,13 +143,12 @@ process_exit (void)
   uint32_t *pd;
 
   lock_acquire(&fs_lock);
+  process_close_file(-1);
+  if (cur->executable != NULL)
+	file_close(cur->executable);
 
-  if (cur->cur_file != NULL)
-	file_close(cur->cur_file);
-
-  lock_release(&fs_lock);
-  /* Destroy the current process's page directory and switch back
-     to the kernel-only page directory. */
+  lock_release(&fs_lock);  
+  remove_child_processes();
 
   bool parent_lives = thread_alive(cur->parent_id);
   bool child_lives = cur->cp;
@@ -157,6 +156,7 @@ process_exit (void)
  
  if (parent_lives && child_lives && running_file) {
 	cur->cp->exit = true;
+	sema_up(&cur->cp->exit_sema);
  }
 
   pd = cur->pagedir;
@@ -291,6 +291,7 @@ load (const char *file_name, void (**eip) (void), void **esp, char** saveptr)
       goto done; 
     }
    file_deny_write(file);
+   t->executable = file;
 //##Disable file write for 'file' here. GO TO BOTTOM. DON'T CHANGE ANYTHING IN THESE IF AND FOR STATEMENTS  
 
 /* Read and verify executable header. */
